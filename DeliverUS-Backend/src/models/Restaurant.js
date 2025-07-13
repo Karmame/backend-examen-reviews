@@ -8,6 +8,7 @@ const loadModel = (sequelize, DataTypes) => {
       Restaurant.belongsTo(models.RestaurantCategory, { foreignKey: 'restaurantCategoryId', as: 'restaurantCategory' })
       Restaurant.belongsTo(models.User, { foreignKey: 'userId', as: 'user' })
       Restaurant.hasMany(models.Product, { foreignKey: 'restaurantId', as: 'products' })
+      Restaurant.hasMany(models.Review, { foreignKey: 'restaurantId', as: 'reviews' })
       Restaurant.hasMany(models.Order, { foreignKey: 'restaurantId', as: 'orders' })
     }
 
@@ -22,7 +23,17 @@ const loadModel = (sequelize, DataTypes) => {
     }
 
     async getAvgStars () {
-
+      try {
+        const reviews = await this.getReviews()
+        if (reviews.length !== 0) {
+          const totalStars = reviews.reduce((acc, review) => acc + review.stars, 0)
+          return totalStars / reviews.length
+        } else {
+          return null
+        }
+      } catch (err) {
+        return err
+      }
     }
   }
 
